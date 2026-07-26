@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# C:S2 Game Dependencies
+*.dll
+*.pdb
+*.xml
