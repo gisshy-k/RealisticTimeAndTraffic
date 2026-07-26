@@ -1,0 +1,8 @@
+{
+  "id": "RealisticTimeAndTraffic",
+  "version": "1.0.0",
+  "displayName": "Realistic Time and Traffic",
+  "description": "Adjusts time flow and traffic logic for a more realistic simulation pace.",
+  "cmdLineArguments": [],
+  "dependencies": []
+}
