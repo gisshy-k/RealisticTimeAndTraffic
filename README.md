@@ -1,6 +1,6 @@
 # Realistic Time and Traffic (RTT)
 
-A lightweight, performance-friendly mod for Cities: Skylines II that gives you full control over the flow of time and traffic volume in your city.It focuses strictly on time and traffic control, utilizing an improved and highly optimized implementation method.It allows for a unique playstyle: you can increase citizen trips to create a bustling, vibrant city atmosphere, while simultaneously slowing down the flow of time to smoothly manage the increased traffic.
+A lightweight, performance-friendly mod for Cities: Skylines II that gives you full control over the flow of time and traffic volume in your city. It focuses strictly on time and traffic control, utilizing an improved and highly optimized implementation method. It allows for a unique playstyle: you can increase citizen trips to create a bustling, vibrant city atmosphere, while simultaneously slowing down the flow of time to smoothly manage the increased traffic.
 
 Inspired by "Realistic Trips", this mod was created to ensure compatibility with mods like "MapExt" (or "EconomyEX"). 
 
@@ -14,6 +14,7 @@ Adjust the flow of time (the clock and calendar) independently of the actual sim
 *   **Days per Month**
     Increases the number of days in a month. The default value is 1, and it can be set between 1 and 30. For example, setting it to 2 means one in-game year will take 24 days.
     ⚠️ **Warning:** Changing this value in an existing save file may shift the current date and significantly impact economic cycles and citizen aging. 
+    ⚠️ **Note on Starting a New Game:** When you start a new game with a custom "Days Per Month" setting, you may notice that the starting month shifts to an earlier date. Please don't worry, **this is completely normal and harmless!** 
 
 *   **Date Display Format**
     Choose from 3 different date display patterns. This setting becomes active when "Days per Month" is set to 2 or more.
@@ -60,6 +61,7 @@ I am not a professional software engineer. This mod was built through dialogue w
 *   **月あたりの日数**
     1月あたりの日数を増やします。デフォルト値は「1」で、1～30日の間で設定可能です。例えば「2」に設定すると、ゲーム内の1年は24日になります。
     ⚠️ **注意:** 既存の都市のセーブデータでこの値を変更すると、現在の日付がズレたり、経済サイクルや市民の年齢変化などに大きな影響を与える可能性があります。
+    ⚠️ **新規ゲーム開始時のカレンダー（月）のズレについて:** 「Days Per Month」の数値を変更して新規ゲームを開始すると、マップ本来の開始月からズレてスタートすることがあります。これはバグではなく、**安全な仕様ですのでご安心ください！**
 
 *   **日付表示フォーマット**
     3つのパターンから選択できます。「月あたりの日数」を2日以上に設定した場合に有効になります。
