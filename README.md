@@ -12,15 +12,15 @@ Inspired by "Realistic Trips", this mod was created to ensure compatibility with
 Adjust the flow of time (the clock and calendar) independently of the actual simulation processing speed.
 
 *   **Days per Month**
-    Increases the number of days in a month. The default value is 1, and it can be set between 1 and 30. For example, setting it to 2 means one in-game year will take 24 days.
-    ⚠️ **Warning:** Changing this value in an existing save file may shift the current date and significantly impact economic cycles and citizen aging. 
+    Increases the number of days in a month. The default value is 1, and it can be set between 1 and 30. For example, setting it to 2 means one in-game year will take 24 days.  
+    ⚠️ **Warning:** Changing this value in an existing save file may shift the current date and significantly impact economic cycles and citizen aging.  
     ⚠️ **Note on Starting a New Game:** When you start a new game with a custom "Days Per Month" setting, you may notice that the starting month shifts to an earlier date. Please don't worry, **this is completely normal and harmless!** 
 
 *   **Date Display Format**
     Choose from 3 different date display patterns. This setting becomes active when "Days per Month" is set to 2 or more.
 
 *   **Slower Time Factor**
-    Slows down the speed of the clock without delaying the simulation processing speed. Configurable between 1 and 10 in 0.5 increments. For example, setting it to 2 makes one day twice as long in game time.
+    Slows down the speed of the clock without delaying the simulation processing speed. Configurable between 1 and 10 in 0.5 increments. For example, setting it to 2 makes one day twice as long in game time.  
     **Note:** Since this only affects the visual clock speed, it is completely safe to change this value in an existing city at any time.
 
 ### 🚗 Traffic Reduction Level
