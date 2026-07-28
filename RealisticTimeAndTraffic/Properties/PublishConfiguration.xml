@@ -66,7 +66,7 @@ I am not a professional software engineer. This mod was built through dialogue w
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="" />
 	<!--Version of the mod-->
-	<ModVersion Value="1.0.1" />
+	<ModVersion Value="1.0.2" />
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.6.*" />
 	<!--Dependency for the mod, can be set multiple times-->
@@ -74,14 +74,12 @@ I am not a professional software engineer. This mod was built through dialogue w
 	<!--Required DLC, can be set multiple times. Supported values are "Landmark Buildings", "San Fransisco Set", "Beach Properties", "Urban Promenades", "Modern Architecture"-->
 	<RequiredDLC Value="" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
-	<ChangeLog Value="Initial release updates and text optimizations." />
-	<!--<ChangeLog>
 	<ChangeLog>
 	<![CDATA[
-- Removed unnecessary DLL files.
-- Updated mod description.
+- Fixed a critical bug where the "Slower Time Factor" setting caused the calendar/year to jump wildly when starting a new game or loading a save (Note: this prevents future jumps, but cannot revert years in already shifted saves).
+- Fixed an issue causing the "Days Per Month" setting to corrupt save data over time. Saves affected by this specific issue will automatically self-heal upon loading.
 	]]>
-	</ChangeLog>-->
+	</ChangeLog>
 	<!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
 	<ExternalLink Type="github" Url="https://github.com/gisshy-k/RealisticTimeAndTraffic/" />
 	<!--Supported values Public, Private, Unlisted-->

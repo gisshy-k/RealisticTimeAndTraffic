@@ -19,8 +19,6 @@ namespace RealisticTimeAndTraffic.Systems
         private float m_SubFrameAccumulator;
         private bool m_Initialized;
 
-        private int m_VanillaDaysPerYear = -1;
-
         [Preserve]
         protected override void OnCreate()
         {
@@ -52,7 +50,20 @@ namespace RealisticTimeAndTraffic.Systems
                     m_Initialized = true;
                 }
 
-                uint deltaFrames = currentFrame - m_LastFrameIndex;
+                // [BUG FIX] Safety lock to prevent time travel upon loading a save or exiting the main menu.
+                // Using 'long' ensures safe detection of time rewinds (e.g., loading an older save).
+                long frameDifference = (long)currentFrame - (long)m_LastFrameIndex;
+
+                // A standard simulation runs at 60 ticks per second.
+                // If the difference is negative or unusually large (e.g., > 256 frames during a load jump),
+                // we reset the tracking to prevent anomalous time offsets.
+                if (frameDifference < 0 || frameDifference > 256)
+                {
+                    m_LastFrameIndex = currentFrame;
+                    frameDifference = 0; // Skip offsetting for this jumped frame
+                }
+
+                uint deltaFrames = (uint)frameDifference;
 
                 if (isCustomTimeEnabled && deltaFrames > 0)
                 {
@@ -84,11 +95,14 @@ namespace RealisticTimeAndTraffic.Systems
             {
                 var timeSettings = m_TimeSettingsQuery.GetSingleton<TimeSettingsData>();
 
-                if (m_VanillaDaysPerYear < 0)
-                    m_VanillaDaysPerYear = timeSettings.m_DaysPerYear;
+                // [BUG FIX] Hardcoded vanilla days per year (12) instead of reading from save data.
+                // Since C:S2 saves modified TimeSettingsData directly into the save file,
+                // reading it dynamically would cause an infinite multiplier loop upon repeated loads.
+                // Forcing this absolute value ensures self-healing of corrupted save files.
+                int vanillaDaysPerYear = 12;
 
                 int daysFactor = isCustomTimeEnabled ? Math.Max(setting.DaysPerMonth, 1) : 1;
-                int targetDaysPerYear = Math.Max(m_VanillaDaysPerYear * daysFactor, 1);
+                int targetDaysPerYear = Math.Max(vanillaDaysPerYear * daysFactor, 1);
 
                 // Overrides the length of a year. 
                 // This updates the UI year while perfectly preserving "absolute time" (e.g., citizen age, statistics).
