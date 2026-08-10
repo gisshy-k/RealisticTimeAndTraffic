@@ -33,6 +33,9 @@ Adjust the flow of time (the clock and calendar) independently of the actual sim
     Slows down the speed of the clock without delaying the simulation processing speed. Configurable between 1 and 10 in 0.5 increments. For example, setting it to 2 makes one day twice as long in game time.
     **Note:** Since this only affects the visual clock speed, it is completely safe to change this value in an existing city at any time.
 
+*   **Sync Aging & Demographics**
+    Automatically adjusts the natural population changes per month to maintain the vanilla game balance. Citizen aging speed, birth rates, and death rates are dynamically scaled based on your combined "Days Per Month" and "Slower Time Factor" settings. For example, if "Days Per Month" is set to 3 and "Slower Time Factor" is set to 2, the aging, birth, and death rates will operate at 1/6th of the vanilla speed. This effectively prevents baby booms and mass die-offs caused by altered time scales.
+
 ### 🚗 Traffic Reduction Level
 In vanilla C:S2, a strong, non-linear system automatically suppresses traffic (cancels trips) as your city grows larger. This mod allows you to lift or relax this suppression, bringing more citizens out into the streets. Conversely, you can also strengthen this suppression to restrict citizens from going out.
 
@@ -66,7 +69,7 @@ I am not a professional software engineer. This mod was built through dialogue w
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="" />
 	<!--Version of the mod-->
-	<ModVersion Value="1.0.2" />
+	<ModVersion Value="1.2.0" />
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.6.*" />
 	<!--Dependency for the mod, can be set multiple times-->
@@ -76,8 +79,8 @@ I am not a professional software engineer. This mod was built through dialogue w
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 	<ChangeLog>
 	<![CDATA[
-- Fixed a critical bug where the "Slower Time Factor" setting caused the calendar/year to jump wildly when starting a new game or loading a save (Note: this prevents future jumps, but cannot revert years in already shifted saves).
-- Fixed an issue causing the "Days Per Month" setting to corrupt save data over time. Saves affected by this specific issue will automatically self-heal upon loading.
+-Added Sync Aging & Demographics: Automatically adjusts natural population changes per month to maintain the vanilla balance. Citizen aging speed, birth rates, and death rates are now dynamically scaled based on your "Days Per Month" and "Slower Time Factor" settings.
+-Added Debug Mode: Added a "Debug Mode" to the settings to track the behavior of the demographics synchronization feature. This is disabled by default.
 	]]>
 	</ChangeLog>
 	<!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->

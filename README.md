@@ -23,6 +23,9 @@ Adjust the flow of time (the clock and calendar) independently of the actual sim
     Slows down the speed of the clock without delaying the simulation processing speed. Configurable between 1 and 10 in 0.5 increments. For example, setting it to 2 makes one day twice as long in game time.  
     **Note:** Since this only affects the visual clock speed, it is completely safe to change this value in an existing city at any time.
 
+*   **Sync Aging & Demographics**
+    Automatically adjusts the natural population changes per month to maintain the vanilla game balance. Citizen aging speed, birth rates, and death rates are dynamically scaled based on your combined "Days Per Month" and "Slower Time Factor" settings. For example, if "Days Per Month" is set to 3 and "Slower Time Factor" is set to 2, the aging, birth, and death rates will operate at 1/6th of the vanilla speed. This effectively prevents baby booms and mass die-offs caused by altered time scales.
+
 ### 🚗 Traffic Reduction Level
 In vanilla C:S2, a strong, non-linear system automatically suppresses traffic (cancels trips) as your city grows larger. This mod allows you to lift or relax this suppression, bringing more citizens out into the streets. Conversely, you can also strengthen this suppression to restrict citizens from going out.
 
@@ -69,6 +72,9 @@ I am not a professional software engineer. This mod was built through dialogue w
 *   **時間をゆっくりする係数**
     シミュレーションの処理速度を遅らせることなく、時計の進むスピードのみを遅くします。0.5刻みで「1～10」の間で設定可能です。例えば「2」に設定すると、1日の長さがゲーム時間で2倍になります。  
     **注意:** こちらは時計の進むスピードのみを変更しているため、既存の都市でいつでも安全に変更可能です。
+
+*   **加齢と人口動態の同期 (Sync Aging & Demographics)**
+    1ヶ月あたりの人口の自然増減がバニラ（標準）と同等のバランスになるよう自動調整します。「月あたりの日数 (Days Per Month)」と「時間の遅延係数 (Slower Time Factor)」の設定値に合わせて、市民の加齢ペース、出生率、死亡率が動的にスケーリングされます。例えば、「月あたりの日数」を3、「時間の遅延係数」を2に設定した場合、加齢・出生・死亡の発生確率はバニラの1/6となります。これにより、時間を遅くしたことによる意図しないベビーブームや大量死を防ぎます。
 
 ### 🚗 交通量削減水準 (Traffic Reduction Level)
 バニラ（ゲーム本体）では、大都市になるほどシステム側から強力な「交通量抑制（外出キャンセル）」がかけられます。本MODではこの抑制を解除・緩和し、より多くの市民が街に繰り出すように設定できます。逆に、この抑制を強化し、市民の外出を制限することもできます。

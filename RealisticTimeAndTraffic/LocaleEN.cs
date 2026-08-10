@@ -20,8 +20,9 @@ namespace RealisticTimeAndTraffic
                 { m_Setting.GetSettingsLocaleID(), "Realistic Time and Traffic" },
                 
                 // Group Names
-                { m_Setting.GetOptionGroupLocaleID("Time Settings"), "Time Settings" },
-                { m_Setting.GetOptionGroupLocaleID("Traffic Settings"), "Traffic Settings" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.kTimeGroup), "Time Settings" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.kTrafficGroup), "Traffic Settings" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.kDebugGroup), "Debug Mode" },
 
                 // Time Settings
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CustomTimeFlow)), "Custom Time Flow" },
@@ -39,12 +40,20 @@ namespace RealisticTimeAndTraffic
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SlowerTimeFactor)), "Slower Time Factor" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SlowerTimeFactor)), "Slows down the simulation time (e.g., 2 means half speed)." },
 
+                // Sync Citizen Aging
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SyncCitizenAging)), "Sync Aging & Demographics" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.SyncCitizenAging)), "Enable to synchronize citizen aging and population dynamics with your custom time flow. It automatically adjusts aging per month and scales daily birth and death rates based on both the 'Days Per Month' and 'Slower Time Factor' settings to prevent population explosions or mass die-offs." },
+
                 // Traffic Settings
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.TrafficReduction)), "Traffic Reduction" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.TrafficReduction)), "Enable to adjust the frequency of citizens leaving home for work, school, shopping, and leisure." },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.TrafficReductionLevel)), "Traffic Reduction Level" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.TrafficReductionLevel)), "15 = Extreme reduction (Ghost Town). 10 = Vanilla behavior. Lower values increase trips. 5 = Crowded (⅓–½ of canceled trips allowed). 0 = Unleashed (no reduction)." },
+
+                // Debug Mode
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DebugLogging)), "Enable Debug Logging" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DebugLogging)), "Outputs detailed tracking logs to help troubleshoot mod behavior. Keep disabled during normal gameplay to save performance." },
             };
         }
 

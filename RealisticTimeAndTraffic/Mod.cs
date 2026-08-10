@@ -3,7 +3,7 @@ using Colossal.IO.AssetDatabase;
 using Game;
 using Game.Modding;
 using Game.SceneFlow;
-using RealisticTimeAndTraffic.Systems;
+using RealisticTimeAndTraffic.Systems; // Ensure CitizenAgingSyncSystem is in this namespace or adjust accordingly
 
 namespace RealisticTimeAndTraffic
 {
@@ -31,6 +31,10 @@ namespace RealisticTimeAndTraffic
             updateSystem.UpdateAt<RTTTimeSystem>(SystemUpdatePhase.GameSimulation);
             updateSystem.UpdateAt<RTTTimeSystem>(SystemUpdatePhase.EditorSimulation);
             updateSystem.UpdateAt<RTTTrafficSystem>(SystemUpdatePhase.GameSimulation);
+
+            // Register the newly created aging synchronization system to run during the game simulation phase
+            updateSystem.UpdateAt<CitizenAgingSyncSystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateAt<DemographicsSyncSystem>(SystemUpdatePhase.GameSimulation);
 
             // Register UI injection system
             updateSystem.UpdateAt<RTTTimeUISystem>(SystemUpdatePhase.UIUpdate);
