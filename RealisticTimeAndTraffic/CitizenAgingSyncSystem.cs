@@ -23,7 +23,7 @@ namespace RealisticTimeAndTraffic
         private int m_LastProcessedMonth = -1;
         private uint m_LastProcessedFrame = 0;
 
-        // ★ Added: Grace period counter for initialization
+        // Grace period counter for initialization and save loading
         private int m_GraceFrames = 0;
 
         protected override void OnCreate()
@@ -39,7 +39,7 @@ namespace RealisticTimeAndTraffic
             RequireForUpdate(m_CitizenQuery);
             RequireForUpdate(m_TimeDataQuery);
 
-            Mod.log.Info("[AgingSync] CitizenAgingSyncSystem initialized. Equipped with Grace Period logic.");
+            Mod.log.Info("[AgingSync] CitizenAgingSyncSystem initialized. Equipped with Vanilla Float Sync logic.");
         }
 
         private void LogDebug(string message)
@@ -72,80 +72,84 @@ namespace RealisticTimeAndTraffic
             TimeData timeData = m_TimeDataQuery.GetSingleton<TimeData>();
             int currentDay = TimeSystem.GetDay(currentFrame, timeData);
 
+            // ====================================================================
+            // ★ CRITICAL FIX: The Vanilla Float Sync
+            // We directly read the vanilla normalizedDate (0.0 to 1.0) because it 
+            // perfectly accounts for any mid-game setting changes (phase shifts).
+            // By using Modulo (% 12) instead of Clamp, we elegantly handle the 
+            // "Year Boundary" (1.0) wrapping perfectly to Month 1 without errors.
+            // ====================================================================
             float yearProgress = m_TimeSystem.normalizedDate;
-
             double monthExact = Math.Round((double)yearProgress * 12.0, 4);
-            int currentMonth = Mathf.Clamp((int)Math.Floor(monthExact) + 1, 1, 12);
+
+            // Safe modulo operation to ensure 12.0 wraps to 0, plus 1 to make it Month 1.
+            int currentUIMonth = ((((int)Math.Floor(monthExact)) % 12) + 12) % 12 + 1;
 
             // 1. Initial Load
             if (m_LastProcessedDay == -1)
             {
                 m_LastProcessedDay = currentDay;
-                m_LastProcessedMonth = currentMonth;
+                m_LastProcessedMonth = currentUIMonth;
                 m_LastProcessedFrame = currentFrame;
                 m_GraceFrames = 60; // Start 60-frame grace period
                 LogDebug($"[AgingSync] Initialization detected. Starting grace period...");
                 return;
             }
 
-            int daysElapsed = currentDay - m_LastProcessedDay;
+            int rawDayDiff = currentDay - m_LastProcessedDay;
             long frameDelta = (long)currentFrame - (long)m_LastProcessedFrame;
 
             // 2. Save Load Detection
-            if (daysElapsed < 0 || daysElapsed > 1 || frameDelta < 0 || frameDelta > 1000)
+            if (rawDayDiff < 0 || rawDayDiff > 1 || frameDelta < 0 || frameDelta > 1000)
             {
                 m_LastProcessedDay = currentDay;
-                m_LastProcessedMonth = currentMonth;
+                m_LastProcessedMonth = currentUIMonth;
                 m_LastProcessedFrame = currentFrame;
-                m_GraceFrames = 60; // Start 60-frame grace period
-                LogDebug($"[AgingSync] Save Load detected (DayDelta: {daysElapsed}, FrameDelta: {frameDelta}). Starting grace period...");
+                m_GraceFrames = 60;
+                LogDebug($"[AgingSync] Save Load detected (DayDelta: {rawDayDiff}, FrameDelta: {frameDelta}). Starting grace period...");
                 return;
             }
 
-            // ====================================================================
-            // 3. GRACE PERIOD (approx. 1 second after load)
-            // Allows time for vanilla systems and custom time mods to apply their 
-            // offsets, preventing the system from locking in a temporary vanilla month.
-            // ====================================================================
+            // 3. GRACE PERIOD (Wait for vanilla float to settle upon load)
             if (m_GraceFrames > 0)
             {
                 m_GraceFrames--;
                 m_LastProcessedDay = currentDay;
-                m_LastProcessedMonth = currentMonth; // Continuously update to catch the settled month
+                m_LastProcessedMonth = currentUIMonth;
                 m_LastProcessedFrame = currentFrame;
 
                 if (m_GraceFrames == 0)
                 {
-                    LogDebug($"[AgingSync] Grace period ended. Tracker locked at Day {currentDay} (UI Month {currentMonth}).");
+                    LogDebug($"[AgingSync] Grace period ended. Tracker locked at Day {currentDay} (UI Month {currentUIMonth}).");
                 }
                 return;
             }
 
-            // 4. Same Day Synchronization
-            if (daysElapsed == 0)
+            // 4. DAY CHANGE DETECTION
+            if (rawDayDiff == 0)
             {
                 m_LastProcessedFrame = currentFrame;
                 return;
             }
 
-            // 5. TRUE MIDNIGHT TRANSITION (daysElapsed == 1)
+            int daysElapsed = rawDayDiff;
             int shiftAmount = 0;
-            bool monthChanged = (currentMonth == (m_LastProcessedMonth % 12) + 1);
+            bool monthChanged = (currentUIMonth == (m_LastProcessedMonth % 12) + 1);
 
             if (monthChanged)
             {
                 shiftAmount = Math.Max(0, daysElapsed - 1);
-                LogDebug($"[AgingSync] Month transition ({m_LastProcessedMonth} -> {currentMonth}) at Day {currentDay}. Action: AGING ALLOWED.");
+                LogDebug($"[AgingSync] Month transition ({m_LastProcessedMonth} -> {currentUIMonth}) at Day {currentDay}. Action: AGING ALLOWED.");
             }
             else
             {
                 shiftAmount = daysElapsed;
-                LogDebug($"[AgingSync] Same UI Month ({currentMonth}) at Day {currentDay}. Action: AGING BLOCKED (Shift +{shiftAmount}).");
+                LogDebug($"[AgingSync] Same UI Month ({currentUIMonth}) at Day {currentDay}. Action: AGING BLOCKED (Shift +{shiftAmount}).");
             }
 
             // Memorize the latest state
             m_LastProcessedDay = currentDay;
-            m_LastProcessedMonth = currentMonth;
+            m_LastProcessedMonth = currentUIMonth;
             m_LastProcessedFrame = currentFrame;
 
             if (shiftAmount > 0)
@@ -154,7 +158,6 @@ namespace RealisticTimeAndTraffic
                 {
                     ShiftAmount = (short)shiftAmount
                 };
-
                 shiftJob.Run(m_CitizenQuery);
             }
         }
