@@ -55,7 +55,7 @@ namespace RealisticTimeAndTraffic
         }
 
         [BurstCompile]
-        private partial struct BirthdayShiftJob : IJobEntity
+        internal partial struct BirthdayShiftJob : IJobEntity
         {
             public short ShiftAmount;
 
@@ -180,11 +180,10 @@ namespace RealisticTimeAndTraffic
 
             if (shiftAmount > 0)
             {
-                BirthdayShiftJob shiftJob = new BirthdayShiftJob
+                new BirthdayShiftJob
                 {
                     ShiftAmount = (short)shiftAmount
-                };
-                shiftJob.Run(m_CitizenQuery);
+                }.Run(m_CitizenQuery);
             }
         }
     }
