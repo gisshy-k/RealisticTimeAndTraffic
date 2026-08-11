@@ -26,6 +26,10 @@ namespace RealisticTimeAndTraffic
         // Grace period counter for initialization and save loading
         private int m_GraceFrames = 0;
 
+        // Added state tracking flags to log toggle changes clearly
+        private bool m_WasActive = true;
+        private bool m_IsFirstRun = true;
+
         protected override void OnCreate()
         {
             base.OnCreate();
@@ -63,10 +67,32 @@ namespace RealisticTimeAndTraffic
 
         protected override void OnUpdate()
         {
-            if (Mod.m_Setting == null || !Mod.m_Setting.SyncCitizenAging) return;
+            // Determine if the feature is currently active based on settings
+            bool isActive = Mod.m_Setting != null &&
+                            Mod.m_Setting.SyncCitizenAging &&
+                            Mod.m_Setting.DaysPerMonth > 1;
 
-            int daysPerMonth = Mathf.Max(Mod.m_Setting.DaysPerMonth, 1);
-            if (daysPerMonth == 1) return;
+            // Handle the case where the feature is turned OFF
+            if (!isActive)
+            {
+                // Log only once when the state changes to OFF or on the first run
+                if (m_WasActive || m_IsFirstRun)
+                {
+                    Mod.log.Info("[AgingSync] Feature is OFF (Vanilla Mode). Citizens will age normally.");
+                    m_WasActive = false;
+                    m_IsFirstRun = false;
+                }
+                return; // Stop processing and allow normal aging
+            }
+
+            // Handle the case where the feature is turned ON
+            if (!m_WasActive || m_IsFirstRun)
+            {
+                // Log only once when the state changes to ON
+                Mod.log.Info("[AgingSync] Feature is ON. Tracking and shifting birthdays.");
+                m_WasActive = true;
+                m_IsFirstRun = false;
+            }
 
             uint currentFrame = m_SimulationSystem.frameIndex;
             TimeData timeData = m_TimeDataQuery.GetSingleton<TimeData>();
