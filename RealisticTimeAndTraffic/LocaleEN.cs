@@ -40,9 +40,9 @@ namespace RealisticTimeAndTraffic
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SlowerTimeFactor)), "Slower Time Factor" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SlowerTimeFactor)), "Slows down the simulation time (e.g., 2 means half speed)." },
 
-                // Sync Citizen Aging
+                // Sync Citizen Aging (短縮版)
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SyncCitizenAging)), "Sync Aging & Demographics" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.SyncCitizenAging)), "Enable to synchronize citizen aging and population dynamics with your custom time flow. It automatically adjusts aging per month and scales daily birth and death rates based on both the 'Days Per Month' and 'Slower Time Factor' settings to prevent population explosions or mass die-offs." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.SyncCitizenAging)), "Automatically adjusts citizen aging speed and birth rates based on your 'Days Per Month' setting. This naturally maintains the vanilla demographic balance and prevents baby booms." },
 
                 // Traffic Settings
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.TrafficReduction)), "Traffic Reduction" },
