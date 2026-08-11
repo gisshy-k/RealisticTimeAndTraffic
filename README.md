@@ -24,7 +24,8 @@ Adjust the flow of time (the clock and calendar) independently of the actual sim
     **Note:** Since this only affects the visual clock speed, it is completely safe to change this value in an existing city at any time.
 
 *   **Sync Aging & Demographics**
-    Automatically adjusts the natural population changes per month to maintain the vanilla game balance. Citizen aging speed, birth rates, and death rates are dynamically scaled based on your combined "Days Per Month" and "Slower Time Factor" settings. For example, if "Days Per Month" is set to 3 and "Slower Time Factor" is set to 2, the aging, birth, and death rates will operate at 1/6th of the vanilla speed. This effectively prevents baby booms and mass die-offs caused by altered time scales.
+    Automatically adjusts citizen aging speed and birth rates to match your custom calendar, maintaining the vanilla game's demographic balance. These rates are dynamically scaled based strictly on your "Days Per Month" setting. For example, if "Days Per Month" is set to 3, citizens will age slower and the daily birth probability will operate at 1/3rd of the vanilla speed.
+    **Note:** The adjustments based on the "Slower Time Factor" introduced in v1.2.0 have been removed due to stability issues and the lack of necessity for demographic balancing.
 
 ### 🚗 Traffic Reduction Level
 In vanilla C:S2, a strong, non-linear system automatically suppresses traffic (cancels trips) as your city grows larger. This mod allows you to lift or relax this suppression, bringing more citizens out into the streets. Conversely, you can also strengthen this suppression to restrict citizens from going out.
