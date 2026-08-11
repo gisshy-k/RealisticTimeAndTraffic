@@ -24,7 +24,7 @@ Adjust the flow of time (the clock and calendar) independently of the actual sim
     **Note:** Since this only affects the visual clock speed, it is completely safe to change this value in an existing city at any time.
 
 *   **Sync Aging & Demographics**
-    Automatically adjusts citizen aging speed and birth rates to match your custom calendar, maintaining the vanilla game's demographic balance. These rates are dynamically scaled based strictly on your "Days Per Month" setting. For example, if "Days Per Month" is set to 3, citizens will age slower and the daily birth probability will operate at 1/3rd of the vanilla speed.
+    Automatically adjusts citizen aging speed and birth rates to match your custom calendar, maintaining the vanilla game's demographic balance. These rates are dynamically scaled based strictly on your "Days Per Month" setting. For example, if "Days Per Month" is set to 3, citizens will age slower and the daily birth probability will operate at 1/3rd of the vanilla speed.  
     **Note:** The adjustments based on the "Slower Time Factor" introduced in v1.2.0 have been removed due to stability issues and the lack of necessity for demographic balancing.
 
 ### 🚗 Traffic Reduction Level
