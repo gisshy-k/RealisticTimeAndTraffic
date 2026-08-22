@@ -9,6 +9,8 @@ using System.Reflection;
 
 namespace RealisticTimeAndTraffic.Systems
 {
+    // Injects custom JavaScript to display the modified date format in the game's UI.
+    // VOLATILE: Depends on Cohtml UI view and vanilla DOM class names (e.g., 'date-time-container').
     public partial class RTTTimeUISystem : UISystemBase
     {
         private EntityQuery m_TimeSettingsQuery;
@@ -26,9 +28,8 @@ namespace RealisticTimeAndTraffic.Systems
             m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
         }
 
-        /// <summary>
-        /// Obtains backdoor access to the game's UI engine (Cohtml) view via reflection.
-        /// </summary>
+        // Uses reflection to obtain access to the Cohtml UI view.
+        // VOLATILE: GameManager.instance.userInterface.view.View
         private void EnsureCohtmlView()
         {
             if (m_CohtmlView == null || m_ExecuteScriptMethod == null)
@@ -42,9 +43,7 @@ namespace RealisticTimeAndTraffic.Systems
             }
         }
 
-        /// <summary>
-        /// Injects and executes JavaScript directly into the UI engine.
-        /// </summary>
+        // Executes a JavaScript string in the UI engine context.
         private void ExecuteJS(string script)
         {
             EnsureCohtmlView();
@@ -54,7 +53,7 @@ namespace RealisticTimeAndTraffic.Systems
                 {
                     m_ExecuteScriptMethod.Invoke(m_CohtmlView, new object[] { script });
                 }
-                catch (Exception) { /* Fail silently to prevent simulation crashes */ }
+                catch (Exception) { /* Ignore exceptions to prevent simulation crashes */ }
             }
         }
 
@@ -68,7 +67,6 @@ namespace RealisticTimeAndTraffic.Systems
             var setting = Mod.m_Setting;
             string newDateOutput = "";
 
-            // Calculate custom date only if the custom time flow is enabled and DaysPerMonth > 1
             if (setting.CustomTimeFlow && setting.DaysPerMonth > 1)
             {
                 var timeSettings = m_TimeSettingsQuery.GetSingleton<TimeSettingsData>();
@@ -99,15 +97,16 @@ namespace RealisticTimeAndTraffic.Systems
                 }
             }
 
-            // Inject the UI modification script only when the date string changes
+            // Inject the UI modification script only when the date string changes.
             if (newDateOutput != m_LastDate)
             {
+                // VOLATILE: The document.querySelectorAll selector targets vanilla CS2 UI classes. 
+                // If Colossal Order updates the UI structure, these selectors must be updated.
                 string jsPayload = $@"
                     (function() {{
                         window.RTTDate = '{newDateOutput}'; 
 
                         if (!window.RTTEnforce) {{
-                            // Inject custom CSS to prevent date text clipping
                             let s = document.createElement('style');
                             s.id = 'rtt-date-style';
                             s.innerHTML = `
@@ -121,7 +120,7 @@ namespace RealisticTimeAndTraffic.Systems
                             `;
                             document.head.appendChild(s);
 
-                            // Function to safely replace vanilla date elements
+                            // Replaces the vanilla date display with the custom format safely.
                             window.RTTEnforce = function() {{
                                 let dateStr = window.RTTDate || '';
                                 let vanillaDates = document.querySelectorAll('div[class*=\'date-time-container\'] div[class*=\'date_\'], div[class*=\'time-controls_\'] div[class*=\'date_\']');
@@ -135,7 +134,7 @@ namespace RealisticTimeAndTraffic.Systems
                                     let custom = p.querySelector('.rtt-custom-date');
                                     
                                     if (dateStr !== '') {{
-                                        v.style.display = 'none'; // Hide vanilla date
+                                        v.style.display = 'none'; 
                                         if (!custom) {{
                                             custom = document.createElement('div');
                                             custom.className = v.className + ' rtt-custom-date';
@@ -146,18 +145,16 @@ namespace RealisticTimeAndTraffic.Systems
                                         }}
                                         custom.style.display = '';
                                     }} else {{
-                                        v.style.display = ''; // Restore vanilla date
+                                        v.style.display = ''; 
                                         if (custom) custom.style.display = 'none';
                                     }}
                                 }});
                             }};
 
-                            // Set up a MutationObserver to re-apply changes if the UI redraws
                             let observer = new MutationObserver(() => {{ window.RTTEnforce(); }});
                             observer.observe(document.body, {{ childList: true, subtree: true }});
                         }}
                         
-                        // Execute immediately
                         window.RTTEnforce();
                     }})();
                 ";

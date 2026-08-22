@@ -9,7 +9,10 @@ using UnityEngine.Scripting;
 
 namespace RealisticTimeAndTraffic.Systems
 {
-    public partial class RTTTimeSystem : GameSystemBase
+    // Updates simulation time data to control the flow of time and the calendar year length.
+    [UpdateInGroup(typeof(SimulationSystemGroup))]
+    [UpdateBefore(typeof(TimeSystem))]
+    public partial class RTTTimeSystem : GameSystemBase, IModCleanup
     {
         private EntityQuery m_TimeDataQuery;
         private EntityQuery m_TimeSettingsQuery;
@@ -18,6 +21,9 @@ namespace RealisticTimeAndTraffic.Systems
         private uint m_LastFrameIndex;
         private float m_SubFrameAccumulator;
         private bool m_Initialized;
+
+        // Hardcoded vanilla default. Reading dynamically from the save file causes recursive multiplication issues.
+        private const int VANILLA_DAYS_PER_YEAR = 12;
 
         [Preserve]
         protected override void OnCreate()
@@ -37,9 +43,7 @@ namespace RealisticTimeAndTraffic.Systems
             bool isCustomTimeEnabled = setting.CustomTimeFlow;
             uint currentFrame = m_SimulationSystem.frameIndex;
 
-            // ==================================================
-            // 1. Slower Time (Safely decelerates future simulation speed only)
-            // ==================================================
+            // 1. Decelerate Simulation Time (Slower Time Factor)
             if (!m_TimeDataQuery.IsEmptyIgnoreFilter)
             {
                 var timeData = m_TimeDataQuery.GetSingleton<TimeData>();
@@ -50,17 +54,12 @@ namespace RealisticTimeAndTraffic.Systems
                     m_Initialized = true;
                 }
 
-                // [BUG FIX] Safety lock to prevent time travel upon loading a save or exiting the main menu.
-                // Using 'long' ensures safe detection of time rewinds (e.g., loading an older save).
+                // Detect frame jumps (e.g., loading a save) to prevent erroneous time offsets.
                 long frameDifference = (long)currentFrame - (long)m_LastFrameIndex;
-
-                // A standard simulation runs at 60 ticks per second.
-                // If the difference is negative or unusually large (e.g., > 256 frames during a load jump),
-                // we reset the tracking to prevent anomalous time offsets.
                 if (frameDifference < 0 || frameDifference > 256)
                 {
                     m_LastFrameIndex = currentFrame;
-                    frameDifference = 0; // Skip offsetting for this jumped frame
+                    frameDifference = 0;
                 }
 
                 uint deltaFrames = (uint)frameDifference;
@@ -70,17 +69,15 @@ namespace RealisticTimeAndTraffic.Systems
                     float timeFactor = Math.Max(setting.SlowerTimeFactor, 1f);
                     if (timeFactor > 1.001f)
                     {
-                        // Calculate the number of frames to offset based on the elapsed difference
+                        // Accumulate fractional frames to cancel out elapsed time, slowing down the clock.
                         float framesToCancel = deltaFrames * (1f - (1f / timeFactor));
                         m_SubFrameAccumulator += framesToCancel;
 
                         uint shift = (uint)Mathf.FloorToInt(m_SubFrameAccumulator);
                         if (shift > 0)
                         {
-                            // Offset elapsed time without shifting the absolute reference point (Safest approach)
                             timeData.m_FirstFrame += shift;
                             m_SubFrameAccumulator -= shift;
-
                             m_TimeDataQuery.SetSingleton(timeData);
                         }
                     }
@@ -88,27 +85,37 @@ namespace RealisticTimeAndTraffic.Systems
                 m_LastFrameIndex = currentFrame;
             }
 
-            // ==================================================
-            // 2. Days Per Month (Maintains absolute time while modifying calendar definitions)
-            // ==================================================
+            // 2. Modify Calendar Length (Days Per Month)
             if (!m_TimeSettingsQuery.IsEmptyIgnoreFilter)
             {
                 var timeSettings = m_TimeSettingsQuery.GetSingleton<TimeSettingsData>();
 
-                // [BUG FIX] Hardcoded vanilla days per year (12) instead of reading from save data.
-                // Since C:S2 saves modified TimeSettingsData directly into the save file,
-                // reading it dynamically would cause an infinite multiplier loop upon repeated loads.
-                // Forcing this absolute value ensures self-healing of corrupted save files.
-                int vanillaDaysPerYear = 12;
-
                 int daysFactor = isCustomTimeEnabled ? Math.Max(setting.DaysPerMonth, 1) : 1;
-                int targetDaysPerYear = Math.Max(vanillaDaysPerYear * daysFactor, 1);
+                int targetDaysPerYear = Math.Max(VANILLA_DAYS_PER_YEAR * daysFactor, 1);
 
-                // Overrides the length of a year. 
-                // This updates the UI year while perfectly preserving "absolute time" (e.g., citizen age, statistics).
+                // Update the length of a year only if the target value differs.
                 if (timeSettings.m_DaysPerYear != targetDaysPerYear)
                 {
                     timeSettings.m_DaysPerYear = targetDaysPerYear;
+                    m_TimeSettingsQuery.SetSingleton(timeSettings);
+                }
+            }
+        }
+
+        protected override void OnDestroy()
+        {
+            Cleanup();
+            base.OnDestroy();
+        }
+
+        public void Cleanup()
+        {
+            if (!m_TimeSettingsQuery.IsEmptyIgnoreFilter)
+            {
+                var timeSettings = m_TimeSettingsQuery.GetSingleton<TimeSettingsData>();
+                if (timeSettings.m_DaysPerYear != VANILLA_DAYS_PER_YEAR)
+                {
+                    timeSettings.m_DaysPerYear = VANILLA_DAYS_PER_YEAR;
                     m_TimeSettingsQuery.SetSingleton(timeSettings);
                 }
             }

@@ -1,18 +1,22 @@
 ﻿using Colossal.Collections;
 using Game;
-using Game.Prefabs;
-using Game.Simulation;
 using Game.Citizens;
 using Game.Common;
-using Unity.Entities;
+using Game.Prefabs;
+using Game.Simulation;
+using RealisticTimeAndTraffic.Systems;
+using System;
 using Unity.Collections;
+using Unity.Entities;
 using UnityEngine;
 
 namespace RealisticTimeAndTraffic
 {
+    // Executes before the vanilla BirthSystem to ensure birth rates are scaled.
+    // VOLATILE: Depends on Game.Prefabs.CitizenParametersData components.
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [UpdateBefore(typeof(BirthSystem))]
-    public partial class DemographicsSyncSystem : GameSystemBase
+    public partial class DemographicsSyncSystem : GameSystemBase, IModCleanup
     {
         private PrefabSystem m_PrefabSystem;
         private SimulationSystem m_SimulationSystem;
@@ -25,7 +29,6 @@ namespace RealisticTimeAndTraffic
 
         private float m_LastTargetDivisor = -1f;
 
-        // Tracker variables
         private int m_LastReportDay = -1;
         private int m_LastReportSegment = -1;
 
@@ -40,35 +43,32 @@ namespace RealisticTimeAndTraffic
             m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
             m_TimeSystem = World.GetOrCreateSystemManaged<TimeSystem>();
 
-            // DeathRate (HealthcareParameterData) is completely removed for stability.
             m_CitizenParamQuery = GetEntityQuery(ComponentType.ReadWrite<CitizenParametersData>(), ComponentType.ReadOnly<PrefabData>());
             m_TimeDataQuery = GetEntityQuery(ComponentType.ReadOnly<TimeData>());
             m_AllCitizensQuery = GetEntityQuery(ComponentType.ReadOnly<Citizen>());
             m_DeadCitizensQuery = GetEntityQuery(ComponentType.ReadOnly<Citizen>(), ComponentType.ReadOnly<HealthProblem>());
 
             RequireForUpdate(m_CitizenParamQuery);
+        }
 
-            Mod.log.Info("[DemographicsSync] System initialized. Scaling BirthRate ONLY based on Days.");
+        private void LogDebug(string message)
+        {
+            if (Mod.m_Setting != null && Mod.m_Setting.DebugLogging)
+            {
+                Mod.log.Info($"[Demographics] {message}");
+            }
         }
 
         protected override void OnUpdate()
         {
             if (Mod.m_Setting == null) return;
 
-            RunQuarterlyTracker();
-
-            // ====================================================================
-            // ★ Days-Only Logic with Pure Vanilla Fallback
-            // If the toggle is OFF, targetDivisor becomes 1.0f (Vanilla).
-            // Slower setting is intentionally ignored for demographic scaling in this release.
-            // ====================================================================
             bool isSyncEnabled = Mod.m_Setting.CustomTimeFlow && Mod.m_Setting.SyncCitizenAging;
             float targetDivisor = 1f;
 
             if (isSyncEnabled)
             {
-                int daysPerMonth = Mathf.Max(Mod.m_Setting.DaysPerMonth, 1);
-                targetDivisor = (float)daysPerMonth;
+                targetDivisor = (float)Mathf.Max(Mod.m_Setting.DaysPerMonth, 1);
             }
 
             if (!m_OriginalsCached)
@@ -77,9 +77,14 @@ namespace RealisticTimeAndTraffic
             }
 
             EnforceScaledRates(targetDivisor, isSyncEnabled);
+
+            if (Mod.m_Setting.DebugLogging)
+            {
+                RunQuarterlyTracker(targetDivisor);
+            }
         }
 
-        private void RunQuarterlyTracker()
+        private void RunQuarterlyTracker(float currentDivisor)
         {
             uint currentFrame = m_SimulationSystem.frameIndex;
             TimeData timeData = m_TimeDataQuery.GetSingleton<TimeData>();
@@ -95,16 +100,9 @@ namespace RealisticTimeAndTraffic
                 return;
             }
 
+            // --- SEGMENT CHANGE DETECTED (Edge Trigger) ---
             if (currentSegment != m_LastReportSegment || currentDay != m_LastReportDay)
             {
-                string timeLabel = currentSegment switch
-                {
-                    1 => "06:00",
-                    2 => "12:00",
-                    3 => "18:00",
-                    _ => "00:00"
-                };
-
                 NativeArray<Citizen> citizens = m_AllCitizensQuery.ToComponentDataArray<Citizen>(Allocator.TempJob);
                 int bornToday = 0;
                 for (int i = 0; i < citizens.Length; i++)
@@ -121,10 +119,9 @@ namespace RealisticTimeAndTraffic
                 }
                 healths.Dispose();
 
-                string toggleState = (Mod.m_Setting != null && Mod.m_Setting.CustomTimeFlow && Mod.m_Setting.SyncCitizenAging) ? "ON" : "OFF";
-                Mod.log.Info($"[DemographicsTracker] --- DAY {m_LastReportDay} | TIME: {timeLabel} | AgingSync: {toggleState} ---");
-                Mod.log.Info($"[DemographicsTracker] Babies born TODAY: {bornToday} | Bodies: {deadCount}");
-                Mod.log.Info($"[DemographicsTracker] ---------------------------------------");
+                string timeLabel = currentSegment switch { 1 => "06:00", 2 => "12:00", 3 => "18:00", _ => "00:00" };
+
+                LogDebug($"Day {m_LastReportDay} ({timeLabel}) | Divisor: {currentDivisor} | Born Today: {bornToday} | Bodies: {deadCount}");
 
                 m_LastReportSegment = currentSegment;
                 m_LastReportDay = currentDay;
@@ -140,31 +137,45 @@ namespace RealisticTimeAndTraffic
 
             m_OriginalBaseBirthRate = citizenPrefab.m_BaseBirthRate;
             m_OriginalAdultFemaleBonus = citizenPrefab.m_AdultFemaleBirthRateBonus;
-
             m_OriginalsCached = true;
-            Mod.log.Info($"[DemographicsSync] Originals cached. Vanilla BaseBirth: {m_OriginalBaseBirthRate}");
+
+            LogDebug($"Original Vanilla Rates Cached. BaseBirth: {m_OriginalBaseBirthRate:F6}");
             return true;
         }
 
         private void EnforceScaledRates(float targetDivisor, bool isSyncEnabled)
         {
-            // Update only if divisor has changed
+            // --- TARGET DIVISOR CHANGE DETECTED (Edge Trigger) ---
             if (Mathf.Abs(m_LastTargetDivisor - targetDivisor) > 0.001f)
             {
-                // =====================================================================================
-                // 1. BIRTH RATE SCALING ONLY: Uses ONLY Days setting
-                // =====================================================================================
                 var citizenData = m_CitizenParamQuery.GetSingleton<CitizenParametersData>();
-                float expectedBirthRate = 1f - Mathf.Pow(1f - m_OriginalBaseBirthRate, 1f / targetDivisor);
 
-                citizenData.m_BaseBirthRate = expectedBirthRate;
+                citizenData.m_BaseBirthRate = 1f - Mathf.Pow(1f - m_OriginalBaseBirthRate, 1f / targetDivisor);
                 citizenData.m_AdultFemaleBirthRateBonus = 1f - Mathf.Pow(1f - m_OriginalAdultFemaleBonus, 1f / targetDivisor);
+
                 m_CitizenParamQuery.SetSingleton(citizenData);
-
-                string stateLabel = isSyncEnabled ? "ON" : "OFF (Vanilla Mode)";
-                Mod.log.Info($"[DemographicsSync] Rates FORCED! Toggle: {stateLabel} | Birth Divisor (Days Only): {targetDivisor}");
-
                 m_LastTargetDivisor = targetDivisor;
+
+                string status = isSyncEnabled ? "SCALED" : "VANILLA FALLBACK";
+                LogDebug($"Status: {status} | Target Divisor: {targetDivisor} | New BaseBirthRate: {citizenData.m_BaseBirthRate:F6} (From {m_OriginalBaseBirthRate:F6})");
+            }
+        }
+
+        protected override void OnDestroy()
+        {
+            Cleanup();
+            base.OnDestroy();
+        }
+
+        public void Cleanup()
+        {
+            if (m_OriginalsCached && !m_CitizenParamQuery.IsEmptyIgnoreFilter)
+            {
+                var citizenData = m_CitizenParamQuery.GetSingleton<CitizenParametersData>();
+                citizenData.m_BaseBirthRate = m_OriginalBaseBirthRate;
+                citizenData.m_AdultFemaleBirthRateBonus = m_OriginalAdultFemaleBonus;
+                m_CitizenParamQuery.SetSingleton(citizenData);
+                LogDebug("Cleanup executed. Vanilla rates restored.");
             }
         }
     }
