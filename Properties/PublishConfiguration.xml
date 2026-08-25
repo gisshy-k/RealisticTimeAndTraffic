@@ -1,0 +1,92 @@
+﻿<Publish>
+	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
+	<ModId Value="152742" />
+	<!--Name of the mod to display to players-->
+	<DisplayName Value="Realistic Time And Traffic" />
+	<!--Short description of the mod-->
+	<ShortDescription Value="Full control over the flow of time and traffic volume in your city." />
+	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
+	<!--LongDescription Value="This is a long description" /-->
+	<LongDescription>
+	<![CDATA[
+# Realistic Time and Traffic (RTT)
+
+A lightweight, performance-friendly mod for Cities: Skylines II that gives you full control over the flow of time and traffic volume in your city.It focuses strictly on time and traffic control, utilizing an improved and highly optimized implementation method.It allows for a unique playstyle: you can increase citizen trips to create a bustling, vibrant city atmosphere, while simultaneously slowing down the flow of time to smoothly manage the increased traffic.
+
+Inspired by "Realistic Trips", this mod was created to ensure compatibility with mods like "MapExt" (or "EconomyEX"). 
+
+**Note: All features are disabled by default upon subscribing to the mod. You must go to the options screen and check the features you want to use.**
+
+## Features
+
+### 🕒 Custom Time Flow
+Adjust the flow of time (the clock and calendar) independently of the actual simulation processing speed.
+
+*   **Days per Month**
+    Increases the number of days in a month. The default value is 1, and it can be set between 1 and 30. For example, setting it to 2 means one in-game year will take 24 days.
+    ⚠️ **Warning:** Changing this value in an existing save file may shift the current date and significantly impact economic cycles and citizen aging. 
+
+*   **Date Display Format**
+    Choose from 3 different date display patterns. This setting becomes active when "Days per Month" is set to 2 or more.
+
+*   **Slower Time Factor**
+    Slows down the speed of the clock without delaying the simulation processing speed. Configurable between 1 and 10 in 0.5 increments. For example, setting it to 2 makes one day twice as long in game time.
+    **Note:** Since this only affects the visual clock speed, it is completely safe to change this value in an existing city at any time.
+
+*   **Sync Aging & Demographics**
+    Automatically adjusts citizen aging speed and birth rates to match your custom calendar, maintaining the vanilla game's demographic balance. These rates are dynamically scaled based strictly on your "Days Per Month" setting. For example, if "Days Per Month" is set to 3, citizens will age slower and the daily birth probability will operate at 1/3rd of the vanilla speed.
+	**Note:** The adjustments based on the "Slower Time Factor" introduced in v1.2.0 have been removed due to stability issues and the lack of necessity for demographic balancing.
+
+### 🚗 Traffic Reduction Level
+In vanilla C:S2, a strong, non-linear system automatically suppresses traffic (cancels trips) as your city grows larger. This mod allows you to lift or relax this suppression, bringing more citizens out into the streets. Conversely, you can also strengthen this suppression to restrict citizens from going out.
+
+RTT introduces a custom mathematical algorithm ensuring that slider adjustments reflect linearly and intuitively on the actual traffic volume. It is specifically optimized for the play feel in mid-to-large cities (100k - 250k population) where traffic jams become a real challenge.
+
+*   **15 (Ghost Town):** Suppresses traffic exponentially stronger than vanilla. Ideal for significantly lowering CPU load in massive cities.
+*   **10 (Vanilla):** Standard game traffic volume.
+*   **8 (Balanced):** Roughly twice the vanilla traffic.
+*   **5 (Crowded):** Allows about ⅓ to ½ of the trips that the vanilla system would normally cancel.
+*   **0 (Unleashed):** 100% of trips are generated with zero cancellations.
+
+## Performance and Safety
+Built purely on the ECS (Entity Component System). It does not add heavy per-frame calculations or inject complex logic into individual citizens (agents). Because it merely overrides global multipliers safely, the performance impact is negligible.
+
+## Compatibility
+*   Compatible with most mods.
+*   May conflict with other mods that directly alter `TimeSettingsData` or `EconomyParameterData` (Traffic Reduction multipliers).
+
+## Disclaimer
+I am not a professional software engineer. This mod was built through dialogue with an AI assistant. The implementation methods have been carefully considered and thoroughly tested, and I am confident it runs stably, but I cannot guarantee perfect operation in all environments. Please use it at your own risk.
+	]]>
+	</LongDescription>
+	<!--Thumbnail-->
+	<Thumbnail Value="Properties/Thumbnail.png" />
+	<!--Screenshot, can be set multiple times-->
+	<Screenshot Value="Properties/gameimage.jpg" />
+	<Screenshot Value="Properties/day_display_format.jpg" />
+	<Screenshot Value="Properties/traffic_reduction_effect.jpg" />
+	<!--Tag, can be set multiple times-->
+	<Tag Value="" />
+	<!--Link to the forum post where the mod can be discussed-->
+	<ForumLink Value="" />
+	<!--Version of the mod-->
+	<ModVersion Value="1.3.3" />
+	<!--Recommended version of the base game to use the mod-->
+	<GameVersion Value="1.6.*" />
+	<!--Dependency for the mod, can be set multiple times-->
+	<Dependency Id="" />
+	<!--Required DLC, can be set multiple times. Supported values are "Landmark Buildings", "San Fransisco Set", "Beach Properties", "Urban Promenades", "Modern Architecture"-->
+	<RequiredDLC Value="" />
+	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
+	<ChangeLog>
+	<![CDATA[
+* **Improved stability when loading save data**
+* **Performance optimization**
+* **Improved save data preservation when toggling mod off or unsubscribing**
+	]]>
+	</ChangeLog>
+	<!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
+	<ExternalLink Type="github" Url="https://github.com/gisshy-k/RealisticTimeAndTraffic/" />
+	<!--Supported values Public, Private, Unlisted-->
+	<AccessLevel Value="Public" />
+</Publish>
