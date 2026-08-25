@@ -4,7 +4,7 @@
 		<!--The file where mod information which is required for publishing mod on PDX mods are stored-->
 		<PublishConfigurationPath>Properties\PublishConfiguration.xml</PublishConfigurationPath>
 
-		<CS2ManagedPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities Skylines II\Cities2_Data\Managed</CS2ManagedPath>
+		<CS2ManagedPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities Skylines II\Cities2_Data\Managed</CS2ManagedPath>
 	</PropertyGroup>
 
 	<!--Imports must be after PropertyGroup block-->
