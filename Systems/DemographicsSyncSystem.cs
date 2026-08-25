@@ -10,7 +10,7 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
-namespace RealisticTimeAndTraffic
+namespace RealisticTimeAndTraffic.Systems
 {
     // Executes before the vanilla BirthSystem to ensure birth rates are scaled.
     // VOLATILE: Depends on Game.Prefabs.CitizenParametersData components.

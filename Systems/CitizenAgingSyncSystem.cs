@@ -8,7 +8,7 @@ using Unity.Entities;
 using UnityEngine;
 using System;
 
-namespace RealisticTimeAndTraffic
+namespace RealisticTimeAndTraffic.Systems
 {
     // Executes before the vanilla AgingSystem to ensure birthdays are shifted 
     // before citizens' ages are updated in the current frame.
